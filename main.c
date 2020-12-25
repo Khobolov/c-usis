@@ -14,16 +14,18 @@ struct Lesson
 struct Teacher
 {
     int id;
-    char name[30];
-    char surname[30];
-    char title[30];
+    char nickname[15];
+    char name[21];
+    char surname[21];
+    char title[21];
 };
 
 struct Student
 {
     int id;
-    char name[30];
-    char surname[30];
+    char nickname[15];
+    char name[21];
+    char surname[21];
     int lesson_count;
     int credit;
 };
@@ -34,8 +36,10 @@ int main() {
     struct Teacher teacher;
     struct Student student;
 
-    int ch;
-    char firstName[30];
+    int ch, idCountTeacher, idCountStudent;
+    int techId, studentId;
+    char nickName[15];
+
 
     menus();
 
@@ -50,10 +54,12 @@ int main() {
             switch (ch)
             {
                 case 1:
-                    regTeacher(teacher);
+                    idCountTeacher = countTeacher(teacher);
+                    regTeacher(teacher, idCountTeacher);
                     break;
                 case 2:
-                    regStudent(student);
+                    idCountStudent = countStudent(student);
+                    regStudent(student, idCountStudent);
                     break;                
             }
             break;
@@ -68,21 +74,24 @@ int main() {
                 //Login Teacher
                 printf("*** Welcome to Login Panel for Teachers ***\n\n");
 
-                printf("## Please, Enter your Firstname: ");
-                scanf("%s", firstName);
+                printf("## Please, Enter your Nickname: ");
+                scanf("%s", nickName);
 
-                if (loginTeacher(teacher, firstName) == 1)
+                if (availableTeacher(teacher, nickName) == 1)
                 {
-                    printf("\n***Hello dear Teacher***\n\n");
+                    printf("\n*** Hello dear Teacher ***\n\n");
                      
                     //Lesson modules
                     menuLesson();
+                    //Find Teacher id with Nickname
+                    techId = findTeachId(teacher, nickName);
+
                     scanf("%d", &ch);
                     printf("\n");
                     switch (ch)
                     {
                     case 1:
-                        addLesson(lesson);
+                        addLesson(lesson, techId);
                         break;
                     case 2:
                         editLesson(lesson);
@@ -98,7 +107,7 @@ int main() {
                 }
                 else
                 {
-                    printf("There is no teacher with such Name\n");
+                    printf("There is no teacher with such Nickname\n");
                 }
             
             case 2:
@@ -151,9 +160,9 @@ void menuLesson()
     printf("Your choice : ");
 }
 
-void regTeacher(struct Teacher teacher)
+void regTeacher(struct Teacher teacher, int id)
 {
-    int id;
+    char nickname[15];
     FILE *fptr;
 
     fptr = fopen("Users/Teachers.txt", "a");
@@ -164,22 +173,22 @@ void regTeacher(struct Teacher teacher)
             exit(1);
         }
 
-            printf("Id: ");
-            scanf("%d", &id);
+            printf("Nickname: ");
+            scanf("%s", nickname);
 
-        if (availableTeacher(teacher, id) == 1)
+        if (availableTeacher(teacher, nickname) == 1)
         {
-            printf("Id %d is Available in the Teachers", id);
+            printf("Nickname: %s is Available in the Teachers", nickname);
         }
         else
-        {
-                
+        {    
             teacher.id = id;
+            strcpy(teacher.nickname, nickname);
             
             printf("Name: ");
             scanf("%s", teacher.name);
 
-            printf("SurName: ");
+            printf("Surname: ");
             scanf("%s", teacher.surname);
 
             printf("Title: ");
@@ -202,9 +211,9 @@ void regTeacher(struct Teacher teacher)
         }
 }
 
-void regStudent(struct Student student)
+void regStudent(struct Student student, int id)
 {
-    int id;
+    char nickname[15];
     FILE *fptr;
 
     fptr = fopen("Users/Students.txt", "a");
@@ -215,16 +224,17 @@ void regStudent(struct Student student)
             exit(1);
         }
 
-            printf("Id: ");
-            scanf("%d", &id);
+            printf("Nickname: ");
+            scanf("%s", nickname);
 
-        if (availableStudent(student, id) == 1)
+        if (availableStudent(student, nickname) == 1)
         {
-            printf("Id %d is Available in the Students", id);
+            printf("Nickname %s is Available in the Students", nickname);
         }
         else
         {
             student.id = id;
+            strcpy(student.nickname, nickname);
             
             printf("Name: ");
             scanf("%s", student.name);
@@ -269,7 +279,7 @@ void showTeacher(struct Teacher teacher)
 
     while(fread(&teacher, sizeof(struct Teacher), 1, fptr)) 
     {
-        printf("Id = %d\nName = %s\nSurName = %s\nTitle = %s\n\n", teacher.id, teacher.name, teacher.surname, teacher.title);
+        printf("Id = %d\nNickname = %s\nName = %s\nSurName = %s\nTitle = %s\n\n", teacher.id, teacher.nickname, teacher.name, teacher.surname, teacher.title);
     }
         
     fclose (fptr); 
@@ -289,14 +299,14 @@ void showStudent(struct Student student)
 
     while(fread(&student, sizeof(struct Student), 1, fptr)) 
     {
-        printf("Id = %d\nName = %s\nSurName = %s\nLesson Count = %d\nCredit: %d\n\n", student.id, student.name, student.surname, student.lesson_count, student.credit);
+        printf("Id = %d\nNickname = %s\nName = %s\nSurName = %s\nLesson Count = %d\nCredit: %d\n\n", student.id, student.nickname, student.name, student.surname, student.lesson_count, student.credit);
     }
         
     fclose (fptr); 
 }
 
 
-void addLesson(struct Lesson lesson)
+void addLesson(struct Lesson lesson, int teacher_id)
 {
     int code;
     FILE *fptr;
@@ -319,6 +329,7 @@ void addLesson(struct Lesson lesson)
     else
     {
         lesson.code = code;
+        lesson.teacher_id = teacher_id;
         
         printf("Name: ");
         scanf("%s", lesson.name);
@@ -357,7 +368,7 @@ void showLesson(struct Lesson lesson)
 
     while(fread(&lesson, sizeof(struct Lesson), 1, fptr)) 
     {
-        printf ("Code = %d\nName = %s\nCredit = %d\nQuota = %d\n\n", lesson.code, lesson.name, lesson.credit, lesson.quota);
+        printf ("Code = %d\nName = %s\nCredit = %d\nQuota = %d\nTeacher Id = %d\n\n", lesson.code, lesson.name, lesson.credit, lesson.quota, lesson.teacher_id);
     }
         
     fclose (fptr); 
@@ -475,29 +486,51 @@ void deleteLesson(struct Lesson lesson)
     
 }
 
-//  Count Line //
-// int countLine(struct Lesson lesson)
-// {
-//     int linesCount = 0;
-//     FILE *fptr;
+//  Count Teacher row for auto increment  //
+int countTeacher(struct Teacher teacher)
+{
+    int linesCount = 1;
+    FILE *fptr;
 
-//     fptr = fopen("Lessons.txt", "r");
+    fptr = fopen("Users/Teachers.txt", "r");
 
-//     if(fptr == NULL)
-//     {
-//         printf("Error!");
-//         exit(1);
-//     }
+    if(fptr == NULL)
+    {
+        printf("Error!");
+        exit(1);
+    }
 
-//     while(fread(&lesson, sizeof(struct Lesson), 1, fptr)) {
-//          linesCount++;
-//    }
-//     fclose(fptr);
+    while(fread(&teacher, sizeof(struct Teacher), 1, fptr)) {
+         linesCount++;
+   }
+    fclose(fptr);
 
-//     return linesCount;
-// }
+    return linesCount;
+}
 
-//  Check ID is Available //
+// Count Student row for auto increment //
+int countStudent(struct Student student)
+{
+    int linesCount = 1;
+    FILE *fptr;
+
+    fptr = fopen("Users/Students.txt", "r");
+
+    if(fptr == NULL)
+    {
+        printf("Error!");
+        exit(1);
+    }
+
+    while(fread(&student, sizeof(struct Student), 1, fptr)) {
+         linesCount++;
+   }
+    fclose(fptr);
+
+    return linesCount;
+}
+
+//  Check Lesson Code   //
 int availableCode(struct Lesson lesson, int code)
 {
     FILE *fp;
@@ -519,7 +552,8 @@ int availableCode(struct Lesson lesson, int code)
     return 0;
 }
 
-int availableTeacher(struct Teacher teacher, int id)
+//  Check Teacher Nickname  //
+int availableTeacher(struct Teacher teacher, char nickname[])
 {
     FILE *fp;
 
@@ -527,10 +561,9 @@ int availableTeacher(struct Teacher teacher, int id)
     
     while (!feof(fp))
     {
-
         fread(&teacher, sizeof(struct Teacher), 1, fp);
 
-        if (id == teacher.id)
+        if (strcmp(nickname, teacher.nickname) == 0)
         {
             fclose(fp);
             return 1;
@@ -541,7 +574,8 @@ int availableTeacher(struct Teacher teacher, int id)
     return 0;
 }
 
-int availableStudent(struct Student student, int id)
+//  Check Student Nickname  //
+int availableStudent(struct Student student, char nickname[])
 {
     FILE *fp;
 
@@ -552,7 +586,7 @@ int availableStudent(struct Student student, int id)
 
         fread(&student, sizeof(struct Student), 1, fp);
 
-        if (id == student.id)
+        if (strcmp(nickname, student.nickname) == 0)
         {
             fclose(fp);
             return 1;
@@ -563,21 +597,20 @@ int availableStudent(struct Student student, int id)
     return 0;
 }
 
-int loginTeacher(struct Teacher teacher, char firstname[])
+int findTeachId(struct Teacher teacher, char nickname[])
 {
-    FILE *fp;
+     FILE *fp;
 
     fp = fopen("Users/Teachers.txt", "r");
     
     while (!feof(fp))
     {
-
         fread(&teacher, sizeof(struct Teacher), 1, fp);
 
-        if (strcmp(firstname, teacher.name) == 0)
+        if (strcmp(nickname, teacher.nickname) == 0)
         {
             fclose(fp);
-            return 1;
+            return teacher.id;
         }
     }
     fclose(fp);
