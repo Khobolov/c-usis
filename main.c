@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct Lesson
 {
@@ -34,6 +35,7 @@ int main() {
     struct Student student;
 
     int ch;
+    char firstName[30];
 
     menus();
 
@@ -64,25 +66,40 @@ int main() {
             {
             case 1: 
                 //Login Teacher
-                menuLesson();
-                scanf("%d", &ch);
-                printf("\n");
-                switch (ch)
+                printf("*** Welcome to Login Panel for Teachers ***\n\n");
+
+                printf("## Please, Enter your Firstname: ");
+                scanf("%s", firstName);
+
+                if (loginTeacher(teacher, firstName) == 1)
                 {
-                case 1:
-                    addLesson(lesson);
-                    break;
-                case 2:
-                    editLesson(lesson);
-                    break;
-                case 3:
-                    showLesson(lesson);
-                    break;
-                case 4: 
-                    deleteLesson(lesson);
+                    printf("\n***Hello dear Teacher***\n\n");
+                     
+                    //Lesson modules
+                    menuLesson();
+                    scanf("%d", &ch);
+                    printf("\n");
+                    switch (ch)
+                    {
+                    case 1:
+                        addLesson(lesson);
+                        break;
+                    case 2:
+                        editLesson(lesson);
+                        break;
+                    case 3:
+                        showLesson(lesson);
+                        break;
+                    case 4: 
+                        deleteLesson(lesson);
+                        break;
+                    }
                     break;
                 }
-                break;
+                else
+                {
+                    printf("There is no teacher with such Name\n");
+                }
             
             case 2:
                 //Login Student                
@@ -511,7 +528,7 @@ int availableTeacher(struct Teacher teacher, int id)
     while (!feof(fp))
     {
 
-        fread(&teacher, sizeof(struct Lesson), 1, fp);
+        fread(&teacher, sizeof(struct Teacher), 1, fp);
 
         if (id == teacher.id)
         {
@@ -533,7 +550,7 @@ int availableStudent(struct Student student, int id)
     while (!feof(fp))
     {
 
-        fread(&student, sizeof(struct Lesson), 1, fp);
+        fread(&student, sizeof(struct Student), 1, fp);
 
         if (id == student.id)
         {
@@ -546,4 +563,24 @@ int availableStudent(struct Student student, int id)
     return 0;
 }
 
+int loginTeacher(struct Teacher teacher, char firstname[])
+{
+    FILE *fp;
 
+    fp = fopen("Users/Teachers.txt", "r");
+    
+    while (!feof(fp))
+    {
+
+        fread(&teacher, sizeof(struct Teacher), 1, fp);
+
+        if (strcmp(firstname, teacher.name) == 0)
+        {
+            fclose(fp);
+            return 1;
+        }
+    }
+    fclose(fp);
+
+    return 0;
+}
