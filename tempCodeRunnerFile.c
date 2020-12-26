@@ -1,21 +1,4 @@
-teacher.id = id;
-            
-            // printf("Name: ");
-            // scanf("%s", teacher.name);
-
-            // printf("SurName: ");
-            // scanf("%s", teacher.surname);
-
-            // printf("Title: ");
-            // scanf("%s", teacher.title);
-
-            // fwrite (&teacher, sizeof(struct Teacher), 1, fptr);
-
-            // if(fwrite != 0)  
-            //     printf("contents to file written successfully !\n"); 
-            // else 
-            //     printf("error writing file !\n"); 
-
-            // fclose(fptr);
-
-            // printf("Teacher added\n\n");
+ // if (lesson.teacher_id == id)
+        // {
+        //     printf ("Code = %d\nName = %s\nCredit = %d\nQuota = %d\nTeacher Id = %d\n\n", lesson.code, lesson.name, lesson.credit, lesson.quota, lesson.teacher_id);
+        // }

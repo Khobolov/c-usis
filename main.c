@@ -83,6 +83,7 @@ int main() {
                      
                     //Lesson modules
                     menuLesson();
+                    
                     //Find Teacher id with Nickname
                     techId = findTeachId(teacher, nickName);
 
@@ -94,13 +95,13 @@ int main() {
                         addLesson(lesson, techId);
                         break;
                     case 2:
-                        editLesson(lesson);
+                        editLesson(lesson, techId);
                         break;
                     case 3:
-                        showLesson(lesson);
+                        showLesson(lesson, techId);
                         break;
                     case 4: 
-                        deleteLesson(lesson);
+                        deleteLesson(lesson); // * Delete //
                         break;
                     }
                     break;
@@ -354,7 +355,7 @@ void addLesson(struct Lesson lesson, int teacher_id)
 
 }
 
-void showLesson(struct Lesson lesson)
+void showLesson(struct Lesson lesson, int id)
 {
     FILE *fptr;
 
@@ -368,14 +369,17 @@ void showLesson(struct Lesson lesson)
 
     while(fread(&lesson, sizeof(struct Lesson), 1, fptr)) 
     {
-        printf ("Code = %d\nName = %s\nCredit = %d\nQuota = %d\nTeacher Id = %d\n\n", lesson.code, lesson.name, lesson.credit, lesson.quota, lesson.teacher_id);
+        if (lesson.teacher_id == id)
+        {
+            printf ("Code = %d\nName = %s\nCredit = %d\nQuota = %d\nTeacher Id = %d\n\n", lesson.code, lesson.name, lesson.credit, lesson.quota, lesson.teacher_id);
+        }  
     }
         
     fclose (fptr); 
 }
 
 //  Update Lesson
-void editLesson(struct Lesson lesson)
+void editLesson(struct Lesson lesson, int id)
 {
     FILE *fpt;
     FILE *fpo;
@@ -395,40 +399,50 @@ void editLesson(struct Lesson lesson)
 
         while (fread(&lesson, sizeof(struct Lesson), 1, fpo))
         {
-        if (lesson.code != code)
-            fwrite(&lesson, sizeof(struct Lesson), 1, fpt);
-        else
-        {
-            printf("\n\t1. Update Title: %d of Lesson", lesson.code);
-            printf("\n\t2. Update Name: %s of Lesson", lesson.name);
-            printf("\n\t3. Update Credit: %d of Lesson", lesson.credit);
-            printf("\n\t3. Update Quota: %d of Quota", lesson.quota);
-            printf("\nEnter your choice:");
-            scanf("%d", &ch);
-
-            switch (ch)
+            if (lesson.code != code)
+                fwrite(&lesson, sizeof(struct Lesson), 1, fpt);
+            else
             {
-            case 1:
-                printf("Code : ");
-                scanf("%d", &lesson.code);
-                break;
-            case 2:
-                printf("Name : ");
-                scanf("%s", lesson.name);
-                break;
-            case 3:
-                printf("Credit : ");
-                scanf("%d", &lesson.credit);
-            case 4:
-                printf("Quota : ");
-                scanf("%d", &lesson.quota);
-                break;
-            default:
-                printf("Invalid Selection");
-                break;
+                if (lesson.teacher_id == id)
+                {
+                    printf("\n\t1. Update Code: << %d >> of Lesson", lesson.code);
+                    printf("\n\t2. Update Name: << %s >> of Lesson", lesson.name);
+                    printf("\n\t3. Update Credit: << %d >> of Lesson", lesson.credit);
+                    printf("\n\t3. Update Quota: << %d >> of Quota", lesson.quota);
+                    printf("\nEnter your choice:");
+                    scanf("%d", &ch);
+
+                    switch (ch)
+                    {
+                    case 1:
+                        printf("Code : ");
+                        scanf("%d", &lesson.code);
+                        break;
+                    case 2:
+                        printf("Name : ");
+                        scanf("%s", lesson.name);
+                        break;
+                    case 3:
+                        printf("Credit : ");
+                        scanf("%d", &lesson.credit);
+                    case 4:
+                        printf("Quota : ");
+                        scanf("%d", &lesson.quota);
+                        break;
+                    default:
+                        printf("Invalid Selection");
+                        break;
+                    }
+                    fwrite(&lesson, sizeof(struct Lesson), 1, fpt);
+                    printf("Lesson Updated");
+                }
+                else
+                {
+                    printf("You don't have permission ;) ");
+                    fwrite(&lesson, sizeof(struct Lesson), 1, fpt);  
+                }
+         
             }
-            fwrite(&lesson, sizeof(struct Lesson), 1, fpt);
-        }
         }
         fclose(fpo);
         fclose(fpt);
@@ -441,10 +455,11 @@ void editLesson(struct Lesson lesson)
         }
         fclose(fpo);
         fclose(fpt);
-        printf("Lesson Updated");
+
     }
 }
 
+//  Delete Lesson //
 void deleteLesson(struct Lesson lesson)
 {
     FILE *fpo;
