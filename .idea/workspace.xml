@@ -7,7 +7,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="97c2759a-c436-4c3a-9407-ec65607c5970" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lessons.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Lessons.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StudentLessonRegistration.txt" beforeDir="false" afterPath="$PROJECT_DIR$/StudentLessonRegistration.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tempCodeRunnerFile.c" beforeDir="false" afterPath="$PROJECT_DIR$/tempCodeRunnerFile.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +20,9 @@
   </component>
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -31,6 +38,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="cf.first.check.clang-format" value="false" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -42,6 +50,9 @@
       <updated>1609063882274</updated>
       <workItem from="1609063886365" duration="41000" />
       <workItem from="1609071336566" duration="19000" />
+      <workItem from="1609443787914" duration="7000" />
+      <workItem from="1609972348286" duration="8000" />
+      <workItem from="1609972368009" duration="17000" />
     </task>
     <servers />
   </component>

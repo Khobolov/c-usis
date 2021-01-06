@@ -373,6 +373,7 @@ void addLesson(struct Lesson lesson, int teacher_id) {
 void studentLessonReg(struct Lesson lesson, struct StudentLessonRegistration studentReg, int id) {
     int code;
     FILE *fptr;
+    int checkReg, checkQuo;
 
     fptr = fopen("StudentLessonRegistration.txt", "a");
 
@@ -387,19 +388,34 @@ void studentLessonReg(struct Lesson lesson, struct StudentLessonRegistration stu
     if (availableCode(lesson, code) == 0) {
         printf("Code %d is not Available in the Lessons", code);
     } else {
-        studentReg.id = id;
-        studentReg.code = code;
 
-        fwrite(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr);
+        checkReg = checkLessonReg(studentReg, id, code);
 
-        if (fwrite != 0)
-            printf("contents to file written successfully !\n");
-        else
-            printf("error writing file !\n");
+        if (checkReg == 0) {
+            checkQuo = checkQuota(lesson, studentReg, code);
 
-        fclose(fptr);
+            if (checkQuo == 0) {
+                studentReg.id = id;
+                studentReg.code = code;
 
-        printf("Registration success\n\n");
+                fwrite(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr);
+
+                if (fwrite != 0)
+                    printf("contents to file written successfully !\n");
+                else
+                    printf("error writing file !\n");
+
+                fclose(fptr);
+
+                printf("Registration success\n\n");
+
+            } else {
+                printf("Quota limit detected");
+            }
+        } else {
+            printf("Registration limit detected");
+        }
+
     }
 }
 
@@ -700,6 +716,69 @@ int findStudentId(struct Student student, char nickname[]) {
         }
     }
     fclose(fp);
+
+    return 0;
+}
+
+int checkLessonReg(struct StudentLessonRegistration studentReg, int id, int Lessoncode) {
+    FILE *fp;
+
+    fp = fopen("StudentLessonRegistration.txt", "r");
+
+    while (!feof(fp)) {
+        fread(&studentReg, sizeof(struct StudentLessonRegistration), 1, fp);
+
+        if (studentReg.id == id) {
+
+            if (studentReg.code == Lessoncode) {
+                fclose(fp);
+                return 1;
+            }
+
+        }
+    }
+    fclose(fp);
+
+    return 0;
+}
+
+int checkQuota(struct Lesson lesson, struct StudentLessonRegistration studentReg, int lessonCode) {
+    int count = 0;
+    FILE *fptr, *fpo;
+
+    fptr = fopen("StudentLessonRegistration.txt", "r");
+
+    if (fptr == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    while (fread(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr)) {
+
+        if (studentReg.code == lessonCode) {
+            count++;
+        }
+    }
+    fclose(fptr);
+
+    fpo = fopen("Lessons.txt", "r");
+
+    if (fpo == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    while (fread(&lesson, sizeof(struct Lesson), 1, fpo)) {
+
+        if (lesson.code == lessonCode) {
+            if (lesson.quota == count) {
+                fclose(fpo);
+                return 1;
+            }
+        }
+
+    }
+    fclose(fpo);
 
     return 0;
 }
