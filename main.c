@@ -134,7 +134,7 @@ int main() {
                                 break;
 
                             case 2:
-                                studentLessonReg(lesson, studentReg, studentId);
+                                studentLessonReg(student, lesson, studentReg, studentId);
                                 break;
 
                             case 3:
@@ -269,11 +269,8 @@ void regStudent(struct Student student, int id) {
         printf("Surname: ");
         scanf("%s", student.surname);
 
-        printf("Lesson Count: ");
-        scanf("%d", &student.lesson_count);
-
-        printf("Credit: ");
-        scanf("%d", &student.credit);
+        student.lesson_count = 0; //default
+        student.credit = 0; //default
 
         fwrite(&student, sizeof(struct Student), 1, fptr);
 
@@ -370,9 +367,9 @@ void addLesson(struct Lesson lesson, int teacher_id) {
 }
 
 //  Student register to Lesson  //
-void studentLessonReg(struct Lesson lesson, struct StudentLessonRegistration studentReg, int id) {
-    int code;
-    FILE *fptr;
+void studentLessonReg(struct Student student, struct Lesson lesson, struct StudentLessonRegistration studentReg, int id) {
+    int code, lessonCredit, studentOldCredit, studentNewCredit;
+    FILE *fptr, *fpo, *fpw, *fpl;
     int checkReg, checkQuo;
 
     fptr = fopen("StudentLessonRegistration.txt", "a");
@@ -401,13 +398,80 @@ void studentLessonReg(struct Lesson lesson, struct StudentLessonRegistration stu
                 fwrite(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr);
 
                 if (fwrite != 0)
-                    printf("contents to file written successfully !\n");
+                    printf("contents to << StudentLessonRegistration >> file written successfully !\n");
                 else
-                    printf("error writing file !\n");
+                    printf("error writing to << StudentLessonRegistration >> file !\n");
 
                 fclose(fptr);
 
-                printf("Registration success\n\n");
+
+                fpl = fopen("Lessons.txt", "r");
+
+                if (fpl == NULL) {
+                    printf("Error!");
+                    exit(1);
+                }
+
+                while (fread(&lesson, sizeof(struct Lesson), 1, fpl))
+                {
+                  if (lesson.code == code)
+                  {
+                      lessonCredit = lesson.credit;
+                  }
+                  
+                }
+                fclose(fpl);
+
+
+                fpo = fopen("Users/Students.txt", "r");
+                fpw = fopen("Users/StudentTemps.txt", "w");
+
+                if (fpo == NULL) {
+                    printf("Error!");
+                    exit(1);
+                }
+
+                if (fpw == NULL) {
+                    printf("Error!");
+                    exit(1);
+                }
+
+                while (fread(&student, sizeof(struct Student), 1, fpo))
+                {
+                   if (student.id == id)
+                   {
+                        studentOldCredit = student.credit;
+
+                        studentNewCredit = lessonCredit + studentOldCredit;
+
+                        student.credit = studentNewCredit;
+
+                        fwrite(&student, sizeof(struct Student), 1, fpw);
+
+                        if (fwrite != 0){
+                            printf("contents to << Student >> file written successfully !\n");
+                        } else{
+                            printf("error writing to << Student >> file !\n");
+                        }
+                   }else
+                   {
+                       fwrite(&student, sizeof(struct Student), 1, fpw);
+                   }
+                   
+                }
+                fclose(fpo);
+                fclose(fpw);
+
+
+                fpo = fopen("Users/StudentTemps.txt", "r");
+                fpw = fopen("Users/Students.txt", "w");
+                while (fread(&lesson, sizeof(struct Student), 1, fpo)) {
+                    fwrite(&lesson, sizeof(struct Student), 1, fpw);
+                }
+                fclose(fpo);
+                fclose(fpw);
+
+                printf("Lesson registration success\n\n");
 
             } else {
                 printf("Quota limit detected");
