@@ -102,6 +102,12 @@ int main() {
                             case 4:
                                 deleteLesson(lesson); // * Delete //
                                 break;
+                            case 5:
+                                showLessonOfStudent(studentReg, student);
+                                break;
+                            case 6:
+                                addNamestoText(studentReg, student);
+                            break;
                         }
 
                     } else {
@@ -190,13 +196,15 @@ void menuLesson() {
     printf("2.  Edit Lesson\n");
     printf("3.  Show Lessons\n");
     printf("4.  Delete Lesson\n");
+    printf("5.  Show Students which joined lesson\n");
+    printf("6.  Add name to Text");
     printf("Your choice : ");
 }
 
 void menuStudent() {
     printf("1.  Show All Lesson\n");
     printf("2.  Join Lesson\n");
-    printf("3.  Show Registered Lesson");
+    printf("3.  Show Registered Lesson\n");
     printf("Your choice : ");
 }
 
@@ -367,17 +375,11 @@ void addLesson(struct Lesson lesson, int teacher_id) {
 }
 
 //  Student register to Lesson  //
-void studentLessonReg(struct Student student, struct Lesson lesson, struct StudentLessonRegistration studentReg, int id) {
+void
+studentLessonReg(struct Student student, struct Lesson lesson, struct StudentLessonRegistration studentReg, int id) {
     int code, lessonCredit, studentOldCredit, studentNewCredit;
     FILE *fptr, *fpo, *fpw, *fpl;
     int checkReg, checkQuo;
-
-    fptr = fopen("StudentLessonRegistration.txt", "a");
-
-    if (fptr == NULL) {
-        printf("Error!");
-        exit(1);
-    }
 
     printf("Code: ");
     scanf("%d", &code);
@@ -395,15 +397,6 @@ void studentLessonReg(struct Student student, struct Lesson lesson, struct Stude
                 studentReg.id = id;
                 studentReg.code = code;
 
-                fwrite(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr);
-
-                if (fwrite != 0)
-                    printf("contents to << StudentLessonRegistration >> file written successfully !\n");
-                else
-                    printf("error writing to << StudentLessonRegistration >> file !\n");
-
-                fclose(fptr);
-
 
                 fpl = fopen("Lessons.txt", "r");
 
@@ -412,13 +405,11 @@ void studentLessonReg(struct Student student, struct Lesson lesson, struct Stude
                     exit(1);
                 }
 
-                while (fread(&lesson, sizeof(struct Lesson), 1, fpl))
-                {
-                  if (lesson.code == code)
-                  {
-                      lessonCredit = lesson.credit;
-                  }
-                  
+                while (fread(&lesson, sizeof(struct Lesson), 1, fpl)) {
+                    if (lesson.code == code) {
+                        lessonCredit = lesson.credit;
+                    }
+
                 }
                 fclose(fpl);
 
@@ -436,28 +427,40 @@ void studentLessonReg(struct Student student, struct Lesson lesson, struct Stude
                     exit(1);
                 }
 
-                while (fread(&student, sizeof(struct Student), 1, fpo))
-                {
-                   if (student.id == id)
-                   {
+                while (fread(&student, sizeof(struct Student), 1, fpo)) {
+                    if (student.id == id) {
+
                         studentOldCredit = student.credit;
 
                         studentNewCredit = lessonCredit + studentOldCredit;
 
-                        student.credit = studentNewCredit;
+                        if (studentNewCredit < 25) {
+
+                            student.credit = studentNewCredit;
+
+                            fptr = fopen("StudentLessonRegistration.txt", "a");
+
+                            if (fptr == NULL) {
+                                printf("Error!");
+                                exit(1);
+                            }
+
+                            fwrite(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr);
+
+                            fclose(fptr);
+
+                            printf("Lesson registration success\n\n");
+
+                        } else {
+                            printf("You can't join this Lesson for Credit");
+                        }
 
                         fwrite(&student, sizeof(struct Student), 1, fpw);
 
-                        if (fwrite != 0){
-                            printf("contents to << Student >> file written successfully !\n");
-                        } else{
-                            printf("error writing to << Student >> file !\n");
-                        }
-                   }else
-                   {
-                       fwrite(&student, sizeof(struct Student), 1, fpw);
-                   }
-                   
+                    } else {
+                        fwrite(&student, sizeof(struct Student), 1, fpw);
+                    }
+
                 }
                 fclose(fpo);
                 fclose(fpw);
@@ -470,8 +473,6 @@ void studentLessonReg(struct Student student, struct Lesson lesson, struct Stude
                 }
                 fclose(fpo);
                 fclose(fpw);
-
-                printf("Lesson registration success\n\n");
 
             } else {
                 printf("Quota limit detected");
@@ -845,4 +846,115 @@ int checkQuota(struct Lesson lesson, struct StudentLessonRegistration studentReg
     fclose(fpo);
 
     return 0;
+}
+
+void showLessonOfStudent(struct StudentLessonRegistration studentReg, struct Student student) {
+
+    FILE *fptr, *fpo;
+    int code, studentId;
+    int flag = 0;
+
+    printf("Please, insert to Lesson code: ");
+    scanf("%d", &code);
+
+    fptr = fopen("StudentLessonRegistration.txt", "r");
+
+
+    if (fptr == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    if (fpo == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    while (fread(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr)) {
+
+        if (studentReg.code == code) {
+
+            studentId = studentReg.id;
+
+            fpo = fopen("Users/Students.txt", "r");
+            while (fread(&student, sizeof(struct Student), 1, fpo)) {
+
+                if (student.id == studentId) {
+                    printf("=> %s | %s\n", student.name, student.surname);
+                    flag = 1;
+                }
+
+            }
+            fclose(fpo);
+
+        }
+    }
+    fclose(fptr);
+
+    if (flag != 1) {
+        printf("Don't have Student with this the Name");
+    }
+
+}
+
+void addNamestoText(struct StudentLessonRegistration studentReg, struct Student student)
+{
+    FILE *fptr, *fpo, *fps, *out;
+    char fileSpec[32];
+    int code, studentId;
+    int flag = 0;
+
+    printf("Please, insert to Lesson code: ");
+    scanf("%d", &code);
+
+    fptr = fopen("StudentLessonRegistration.txt", "r");
+
+
+    if (fptr == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    if (fpo == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    while (fread(&studentReg, sizeof(struct StudentLessonRegistration), 1, fptr)) {
+
+        if (studentReg.code == code) {
+
+            studentId = studentReg.id;
+
+            fpo = fopen("Users/Students.txt", "r");
+            while (fread(&student, sizeof(struct Student), 1, fpo)) {
+
+                if (student.id == studentId) {
+                
+                        snprintf(fileSpec, sizeof(fileSpec ), "Class/%d_siniflistesi.txt", code);
+
+                        out = fopen(fileSpec, "a" );
+
+                        if (out == NULL) {
+                            printf("Error!");
+                            exit(1);
+                        }
+
+                        fprintf(out, "%s %s\n", student.name, student.surname);
+
+                        fclose(out);
+
+                    flag = 1;
+                }
+
+            }
+            fclose(fpo);
+
+        }
+    }
+    fclose(fptr);
+
+    if (flag != 1) {
+        printf("Don't have Student with this the Name");
+    }
 }
